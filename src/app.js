@@ -2,7 +2,44 @@ const express = require('express');
 
 const app = express();
 
-const {adminAuth, userAuth} = require('./middleware/auth')
+const connectDB = require('./config/database');
+const User = require('./models/user')
+
+// const {adminAuth, userAuth} = require('./middleware/auth')
+
+
+app.post('/signup',async (req,res)=>{
+    const userObj = {
+        firstName: "himli",
+        lastName: "bharti",
+        emailId: "himli234@gmail.com",
+        password: "himli123",
+        age: 5
+    }
+
+
+// creatig a new instance to the user model
+    const user = new User(userObj)
+    try {
+        await user.save();
+        res.send("user added successfully!!!")
+    }catch (err){
+        res.status(400).send("error occured"+ err.message)
+    }
+})
+
+
+
+
+
+connectDB().then(()=>{
+    console.log("database conncted successfully!!!");
+    app.listen(3000, ()=>{
+        console.log(`server is running on port: 3000............`);
+    });
+}).catch((error) => {
+    console.log("database not conncted successfully!!")
+})
 
 
 // const port  = 3000;
@@ -95,21 +132,21 @@ const {adminAuth, userAuth} = require('./middleware/auth')
 //     }
 // })
 
-app.use('/admin',adminAuth);
-// app.use('/admin',userAuth);
+// app.use('/admin',adminAuth);
+// // app.use('/admin',userAuth);
 
-app.get('/admin/getUserData',(req,res)=>{
-        res.send("sent user admin")
-})
+// app.get('/admin/getUserData',(req,res)=>{
+//         res.send("sent user admin")
+// })
 
 
-app.get('/admin/deleteUserData',(req,res)=>{
-            res.send("delete user admin")
-    })
+// app.get('/admin/deleteUserData',(req,res)=>{
+//             res.send("delete user admin")
+//     })
 
-app.get('/user',userAuth,(req,res)=>{
-        res.send("sent user data")
-})
+// app.get('/user',userAuth,(req,res)=>{
+//         res.send("sent user data")
+// })
 
 
 
@@ -129,6 +166,3 @@ app.get('/user',userAuth,(req,res)=>{
 //     res.status(500).send("Something went wrong!!!")
 // })
 
-// app.listen(3000, ()=>{
-//     console.log(`server is running on port: 3000`);
-// });
