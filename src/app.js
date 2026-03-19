@@ -3,29 +3,104 @@ const express = require('express');
 const app = express();
 
 const connectDB = require('./config/database');
-const User = require('./models/user')
+const User = require('./models/user');
+
+app.use(express.json())
 
 // const {adminAuth, userAuth} = require('./middleware/auth')
 
+app.get('/user',async (req,res)=>{
+    const userEmail =  req.body.emailId;
+
+    try{
+        console.log(userEmail)
+        const userData = await User.find({emailId: userEmail});
+        if(userData.length === 0){
+            res.status(404).send("user not found!!")
+        }else{
+        res.send(userData);
+        }
+
+    }catch(error){
+        res.status(400).send("error occured"+ error.message);
+    }
+
+})
+
+app.get('/feed',async (req,res)=>{
+
+    try{
+        const userList = await User.find({});
+        if(!userList){
+            res.status(404).send("user not found!!");
+        }
+        else{
+            res.send(userList);
+        }
+    }catch(error){
+        res.status(400).send("error occured"+ error.message);
+    }
+})
+
+app.delete('/deleteUser',async (req,res)=>{
+    const userId = req.body.userId;
+    try{
+        console.log(userId)
+        const userList = await User.findByIdAndDelete(userId);
+        if(!userList){
+            res.status(404).send("user not found!!");
+        }
+        else{
+            res.send("User deleted successfully");
+        }
+    }catch(error){
+        res.status(400).send("error occured"+ error.message);
+    }
+})
+
+app.patch('/update', async (req,res)=>{
+    const userId = req.body.userId;
+    const data = req.body;
+
+    try{
+        console.log(data)
+        const userList = await User.findByIdAndUpdate(userId, data, {returmDocument: "after"});
+        res.send("user updated successfully");
+        console.log(userList)
+    }catch(error){
+        res.status(400).send("error occured"+ error.message);
+
+    }
+})
+
 
 app.post('/signup',async (req,res)=>{
-    const userObj = {
-        firstName: "himli",
-        lastName: "bharti",
-        emailId: "himli234@gmail.com",
-        password: "himli123",
-        age: 5
-    }
+    // const userObj = {
+    //     firstName: "himli",
+    //     lastName: "bharti",
+    //     emailId: "himli234@gmail.com",
+    //     password: "himli123",
+    //     age: 5
+    // }
 
+        const users = req.body;
+
+        const userList = new User(users);
+        try{
+            await userList.save();
+            res.send("users added successfully!!!")
+        }catch(error){
+            res.status(400).send("error occured"+ error.message);
+        }
 
 // creatig a new instance to the user model
-    const user = new User(userObj)
-    try {
-        await user.save();
-        res.send("user added successfully!!!")
-    }catch (err){
-        res.status(400).send("error occured"+ err.message)
-    }
+    // const user = new User(userObj)
+    // try {
+    //     await user.save();
+    //     res.send("user added successfully!!!")
+    // }catch (err){
+    //     res.status(400).send("error occured"+ err.message)
+    // }
 })
 
 
@@ -34,8 +109,8 @@ app.post('/signup',async (req,res)=>{
 
 connectDB().then(()=>{
     console.log("database conncted successfully!!!");
-    app.listen(3000, ()=>{
-        console.log(`server is running on port: 3000............`);
+    app.listen(7777, ()=>{
+        console.log(`server is running on port: 7777...`);
     });
 }).catch((error) => {
     console.log("database not conncted successfully!!")
