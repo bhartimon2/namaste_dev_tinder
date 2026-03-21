@@ -58,11 +58,19 @@ app.delete('/deleteUser',async (req,res)=>{
     }
 })
 
-app.patch('/update', async (req,res)=>{
-    const userId = req.body.userId;
+app.patch('/update/:userId', async (req,res)=>{
+    const userId = req.param?.userId;
     const data = req.body;
 
     try{
+        const allowedUpdate = ["about", "photoURL", "gender", "age", "skill"];
+        const isallowed = Object.keys(data).every((k)=>{allowedUpdate.includes(k)})
+        if(!isallowed){
+            res.send("update are not allowed")
+        }
+        if(data.skill.length > 10){
+            throw new Error("skill can not be more than 10");
+        }
         console.log(data)
         const userList = await User.findByIdAndUpdate(userId, data, {returmDocument: "after"});
         res.send("user updated successfully");
