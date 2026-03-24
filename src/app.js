@@ -1,115 +1,108 @@
 const express = require('express');
-
 const app = express();
+const cookieParser = require('cookie-parser');
 
 const connectDB = require('./config/database');
-const User = require('./models/user');
+const jwt = require('jsonwebtoken');
+const {userAuth} = require('./middleware/auth')
 
-app.use(express.json())
+app.use(express.json());
+app.use(cookieParser());
+
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
+
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // const {adminAuth, userAuth} = require('./middleware/auth')
 
-app.get('/user',async (req,res)=>{
-    const userEmail =  req.body.emailId;
+// app.get('/user',async (req,res)=>{
+//     const userEmail =  req.body.emailId;
 
-    try{
-        console.log(userEmail)
-        const userData = await User.find({emailId: userEmail});
-        if(userData.length === 0){
-            res.status(404).send("user not found!!")
-        }else{
-        res.send(userData);
-        }
+//     try{
+//         console.log(userEmail)
+//         const userData = await User.find({emailId: userEmail});
+//         if(userData.length === 0){
+//             res.status(404).send("user not found!!")
+//         }else{
+//         res.send(userData);
+//         }
 
-    }catch(error){
-        res.status(400).send("error occured"+ error.message);
-    }
+//     }catch(error){
+//         res.status(400).send("error occured"+ error.message);
+//     }
 
-})
+// })
 
-app.get('/feed',async (req,res)=>{
+// app.get('/feed',async (req,res)=>{
 
-    try{
-        const userList = await User.find({});
-        if(!userList){
-            res.status(404).send("user not found!!");
-        }
-        else{
-            res.send(userList);
-        }
-    }catch(error){
-        res.status(400).send("error occured"+ error.message);
-    }
-})
+//     try{
+//         const userList = await User.find({});
+//         if(!userList){
+//             res.status(404).send("user not found!!");
+//         }
+//         else{
+//             res.send(userList);
+//         }
+//     }catch(error){
+//         res.status(400).send("error occured"+ error.message);
+//     }
+// })
 
-app.delete('/deleteUser',async (req,res)=>{
-    const userId = req.body.userId;
-    try{
-        console.log(userId)
-        const userList = await User.findByIdAndDelete(userId);
-        if(!userList){
-            res.status(404).send("user not found!!");
-        }
-        else{
-            res.send("User deleted successfully");
-        }
-    }catch(error){
-        res.status(400).send("error occured"+ error.message);
-    }
-})
+// app.delete('/deleteUser',async (req,res)=>{
+//     const userId = req.body.userId;
+//     try{
+//         const userList = await User.findByIdAndDelete(userId);
+//         if(!userList){
+//             res.status(404).send("user not found!!");
+//         }
+//         else{
+//             res.send("User deleted successfully");
+//         }
+//     }catch(error){
+//         res.status(400).send("error occured"+ error.message);
+//     }
+// })
 
-app.patch('/update/:userId', async (req,res)=>{
-    const userId = req.param?.userId;
-    const data = req.body;
+// app.patch('/update/:userId', async (req,res)=>{
+//     const userId = req.param?.userId;
+//     const data = req.body;
 
-    try{
-        const allowedUpdate = ["about", "photoURL", "gender", "age", "skill"];
-        const isallowed = Object.keys(data).every((k)=>{allowedUpdate.includes(k)})
-        if(!isallowed){
-            res.send("update are not allowed")
-        }
-        if(data.skill.length > 10){
-            throw new Error("skill can not be more than 10");
-        }
-        console.log(data)
-        const userList = await User.findByIdAndUpdate(userId, data, {returmDocument: "after"});
-        res.send("user updated successfully");
-        console.log(userList)
-    }catch(error){
-        res.status(400).send("error occured"+ error.message);
+//     try{
+//         const allowedUpdate = ["about", "photoURL", "gender", "age", "skill"];
+//         const isallowed = Object.keys(data).every((k)=>{allowedUpdate.includes(k)})
+//         if(!isallowed){
+//             res.send("update are not allowed!!!")
+//         }
+//         if(data.skill.length > 10){
+//             throw new Error("skill can not be more than 10");
+//         }
+//         const userList = await User.findByIdAndUpdate(userId, data, {returmDocument: "after"});
+//         res.send("user updated successfully");
+//         console.log(userList)
+//     }catch(error){
+//         res.status(400).send("error occured"+ error.message);
 
-    }
-})
+//     }
+// })
 
 
-app.post('/signup',async (req,res)=>{
-    // const userObj = {
-    //     firstName: "himli",
-    //     lastName: "bharti",
-    //     emailId: "himli234@gmail.com",
-    //     password: "himli123",
-    //     age: 5
-    // }
-
-        const users = req.body;
-
-        const userList = new User(users);
-        try{
-            await userList.save();
-            res.send("users added successfully!!!")
-        }catch(error){
-            res.status(400).send("error occured"+ error.message);
-        }
-
-// creatig a new instance to the user model
-    // const user = new User(userObj)
-    // try {
-    //     await user.save();
-    //     res.send("user added successfully!!!")
-    // }catch (err){
-    //     res.status(400).send("error occured"+ err.message)
-    // }
-})
 
 
 
